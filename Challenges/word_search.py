@@ -18,79 +18,92 @@
 # The solution must be implemented inside the function below.
 # Tip: You can create other functions and classes if you want but this is the main function that will be used.
 
-########
+################################################################################################################
 
 class MySolution:
     usedLetters = []
 
     def solution(self, board, word):
-        pass
+        found_letters_positions = []
+        first_letter_position = MySolution.find_letter(board, word[0])  # the first because will not search around it
+        if first_letter_position is not None:
+            print("first letter found: {}".format(board[first_letter_position[0]][first_letter_position[1]]))
+            found_letters_positions.append(first_letter_position)
+            for letter in word[1:]:
+                search_from = None
+                if len(found_letters_positions) > 0:
+                    search_from = found_letters_positions[-1]
+                else:
+                    search_from = first_letter_position
+                next_letter_position = self.search_around(self, board, search_from, letter)
+                print("next letter position: {}".format(next_letter_position))
+                if next_letter_position is not None:
+                    print("letter found: {}, in the position: {} ".format(letter, next_letter_position))
+                    found_letters_positions.append(next_letter_position)
+                else:
+                    print("word partially found")
+                    return False
+            return True
+        else:
+            print("first not found")
+            return False
 
-    def searchAround1(self, board, startingPoint: [int]):
-        for rIdx, row in board:
-            for cIdx, col in row:
-                # 1 [x, y], i need to check:
-                # top left,             top,                top right
-                # [x - 1, y - 1]        [x - 1, y]          [x - 1, y + 1]
-                # middle left,          center              middle right
-                # [x, y - 1]            [x, y]              [x, y + 1]
-                # bottom left,          bottom,             bottom right
-                # [x + 1, y - 1]        [x + 1, y]      [x + 1, y + 1]
-                # 2 check if value is not used
-                # 3 add to used letters and go to next
+    @staticmethod
+    def search_around(self, board, search_from: [int], letter):
+        print("search_from: {}".format(search_from))
+        print("looking for: {}".format(letter))
+        row = search_from[0]
+        col = search_from[1]
+        print("right")
+        position = MySolution.get_middle_right(board, row, col)  # position to search around
+        print(position)
+        if position is None or board[position[0]][position[1]] != letter:
+            print("bottom")
+            position = MySolution.get_bottom(board, row, col)
+            print(position)
+        if position is None or board[position[0]][position[1]] != letter:
+            print("left")
+            position = MySolution.get_middle_left(board, row, col)
+            print(position)
+        if position is None or board[position[0]][position[1]] != letter:
+            print("top")
+            position = MySolution.get_top(board, row, col)
+            print(position)
+        if position is None or board[position[0]][position[1]] != letter:
+            position = None
+        return position
 
+    @staticmethod
+    def get_top(board, x, y):
+        return MySolution.get_position(board, x - 1, y)
 
-    def searchAround(self, board, searchFrom: [int], nextLetter):
-        row = searchFrom[0]
-        col = searchFrom[1]
-        valueFound = board[row, col] == nextLetter
-        if valueFound != None:
-            self.getValue(board, row, col)
-            valueFound = self.getTopLeft(board, row, col)
-        if valueFound == None:
-            valueFound = self.getTop(board, row, col)
-        if valueFound == None:
-            valueFound = self.getTopRight(board, row, col)
-        if valueFound == None:
-            valueFound = self.getMiddleLeft(board, row, col)
-        if valueFound == None:
-            valueFound = self.getMiddleRight(board, row, col)
-        if valueFound == None:
-            valueFound = self.getBottomLeft(board, row, col)
-        if valueFound == None:
-            valueFound = self.getBottom(board, row, col)
-        if valueFound == None:
-            valueFound = self.getBottomRight(board, row, col)
+    @staticmethod
+    def get_middle_left(board, x, y):
+        return MySolution.get_position(board, x, y - 1)
 
+    @staticmethod
+    def get_middle_right(board, x, y):
+        return MySolution.get_position(board, x, y + 1)
 
-    def getTopLeft(self, board, x, y):
-        return self.getValue(board, x-1, y-1)
-    def getTop(self, board, x, y):
-        return self.getValue(board, x - 1, y)
-    def getTopRight(self, board, x, y):
-        return self.getValue(board, x - 1, y + 1)
-    def getMiddleLeft(self, board, x, y):
-        return self.getValue(board, x, y - 1)
-    def getMiddleRight(self, board, x, y):
-        return self.getValue(board, x, y + 1)
-    def getBottomLeft(self, board, x, y):
-        return self.getValue(board, x + 1, y - 1)
-    def getBottom(self, board, x, y):
-        return self.getValue(board, x + 1, y)
-    def getBottomRight(self, board, x, y):
-        return self.getValue(board, x + 1, y + 1)
+    @staticmethod
+    def get_bottom(board, x, y):
+        return MySolution.get_position(board, x + 1, y)
 
-    def getValue(self, board, x, y):
+    @staticmethod
+    def get_position(board, x, y):
         try:
-            if board[x, y] != None:
-                value = board[x, y]
-                self.addUsedLetter(x, y)
-                board[x, y] = None
-                return value
+            if board[x][y] is not None:
+                return [x, y]
             else:
                 return None
         except IndexError:
             pass
 
-    def addUsedLetter(self, x, y):
-        self.usedLetters.append([x,y])
+    @staticmethod
+    def find_letter(board, letter):
+        print(board)
+        for rIdx, row in enumerate(board):
+            for cIdx, col in enumerate(row):
+                if col == letter:
+                    return [rIdx, cIdx]
+        return None
